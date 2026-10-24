@@ -167,17 +167,16 @@ importers:
   .:
     dependencies:
       semver:
-        specifier: ^7.8.5
-        version: 7.8.5
+        specifier: ^7.0.0
+        version: 7.0.0
       uuid:
         specifier: ~8.3.2
         version: 8.3.2
 
 packages:
 
-  semver@7.8.5:
-    resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
-    engines: {node: '>=10'}
+  semver@7.0.0:
+    resolution: {integrity: sha512-+GB6zVA9LWh6zovYQLALHwv5rb2PHGlJi3lfiqIHxR0uuwCgefcOJc59v9fv1w8GbStwxuuqqAjI9NMAOOgq1A==}
     hasBin: true
 
   uuid@8.3.2:
@@ -187,6 +186,6 @@ packages:
 
 snapshots:
 
-  semver@7.8.5: {}
+  semver@7.0.0: {}
 
   uuid@8.3.2: {}

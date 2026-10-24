@@ -1,0 +1,14 @@
+# The check the relock pull request runs (repository-prototype#414). It uses an
+# outdated actions/checkout pin on purpose: the relock moves it.
+name: check
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+permissions: {}
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@1e31de5234b9f8995739874a8ce0492dc87873e2 # v4.0.0
+      - run: git log -1 --format=%H

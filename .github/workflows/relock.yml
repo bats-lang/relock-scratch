@@ -8,7 +8,7 @@ permissions:
   issues: write
 jobs:
   relock:
-    uses: bats-lang/repository-prototype/.github/workflows/relock-pins.yml@aaca43944087d4524732a1c68d6fc9f60d571830 # PR head (repository-prototype#344)
+    uses: bats-lang/repository-prototype/.github/workflows/relock-pins.yml@d4a7b2366cade5adeacfee80a9720d8f1450dce8 # repository-prototype main d4a7b23
     secrets: inherit
     with:
       base: scratch-344b

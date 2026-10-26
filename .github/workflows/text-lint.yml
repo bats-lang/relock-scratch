@@ -1,0 +1,15 @@
+# The real run uses each base branch's files; this file only registers the pull_request_target trigger (repository-prototype#509).
+name: text-lint
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  placeholder:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "placeholder on main, repository-prototype#509"

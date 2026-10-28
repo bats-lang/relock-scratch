@@ -20,3 +20,4 @@ jobs:
     uses: ./.github/workflows/text-lint-check.yml
     with:
       tools-ref: 860dd829602a3d31d21fb9f6db456341a6ed9d35
+# planted change 509: a comment line in the caller, no run cited

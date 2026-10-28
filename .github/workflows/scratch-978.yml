@@ -1,0 +1,96 @@
+# A reduced copy of the change of bats-lang/quire#991 (#978), run where it can run before
+# the file is on the default branch (bats-lang/repository-prototype#509, keyword: text-lint
+# gated; the route of quire#968 comment 6464390489, as scratch-882.yml). quire's check.yml
+# needs the app, its secrets and the Android workflow; this holds what the change edits: the
+# `if:` of plan, build, static, e2e, android and check, the concurrency group, and the two
+# steps of `check` (the draft's summary and the aggregate of plan and build), with the
+# check-aggregate action at the same commit. The jobs' bodies are stubs. A pull request here
+# in draft runs the draft case, marking it ready runs the ready case (ready_for_review), and
+# workflow_dispatch runs the non-pull_request path. The `expect` job fails when a job ended
+# otherwise than the draft or the ready case says.
+name: scratch-978
+on:
+  pull_request:
+    branches: [main]
+    paths: ['.github/workflows/scratch-978.yml']
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: scratch-978-${{ github.event_name }}-${{ github.event.pull_request.draft && 'draft-' || '' }}${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  plan:
+    if: github.event.action != 'destroyed'
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "plan ran; draft=${{ github.event.pull_request.draft }}"
+  build:
+    if: github.event.action != 'destroyed'
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "build ran"
+  static:
+    needs: plan
+    if: github.event.action != 'destroyed' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "static ran"
+  e2e:
+    needs: [plan, build]
+    if: github.event.action != 'destroyed' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "e2e ran"
+  android:
+    needs: build
+    if: github.event.action != 'destroyed' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "android ran"
+  check:
+    if: always() && github.event.action != 'destroyed'
+    needs: [plan, build, static, e2e]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: A draft ran plan and build only
+        if: github.event_name == 'pull_request' && github.event.pull_request.draft
+        run: |
+          echo "### Draft: plan and build only" >> "$GITHUB_STEP_SUMMARY"
+          echo "static, e2e and android are not run for a draft; marking the pull request ready runs the whole check on this head." >> "$GITHUB_STEP_SUMMARY"
+      - name: Plan and build passed
+        if: github.event_name == 'pull_request' && github.event.pull_request.draft
+        uses: bats-lang/repository-prototype/.github/actions/check-aggregate@3b0e3a98f734c4d8bab8f86fa67eaf4c1776e5aa # repository-prototype main 3b0e3a9
+        with:
+          jobs: plan build
+          results: ${{ toJSON(needs) }}
+      - name: Every group passed
+        if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+        uses: bats-lang/repository-prototype/.github/actions/check-aggregate@3b0e3a98f734c4d8bab8f86fa67eaf4c1776e5aa # repository-prototype main 3b0e3a9
+        with:
+          jobs: plan build static e2e
+          results: ${{ toJSON(needs) }}
+  # what a draft and what a ready run must end with, read from the other jobs' results
+  expect:
+    if: always()
+    needs: [plan, build, static, e2e, android, check]
+    runs-on: ubuntu-24.04
+    env:
+      DRAFT: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft }}
+      RESULTS: ${{ toJSON(needs) }}
+    steps:
+      - name: The results of a draft or a ready run
+        run: |
+          set -eu
+          echo "draft=$DRAFT"
+          jq -r 'to_entries[] | "\(.key) \(.value.result)"' <<< "$RESULTS"
+          if [ "$DRAFT" = true ]; then
+            want='plan success build success static skipped e2e skipped android skipped check success'
+          else
+            want='plan success build success static success e2e success android success check success'
+          fi
+          got=$(jq -r '[.plan,.build,.static,.e2e,.android,.check] | map(.result) | join(" ")' <<< "$RESULTS")
+          wantresults=$(echo "$want" | awk '{print $2" "$4" "$6" "$8" "$10" "$12}')
+          echo "want: $wantresults"
+          echo "got:  $got"
+          [ "$got" = "$wantresults" ]

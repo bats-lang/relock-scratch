@@ -1,0 +1,38 @@
+# A reduced copy of the change of bats-lang/quire#969 (#932), run where the file can be on the
+# default branch (bats-lang/repository-prototype#509, keyword: text-lint gated). quire's
+# check.yml needs the app and a built PWA; the change is the call of pwa's e2e-setup by
+# commit with `japanese-font: "true"` and no apt step. This calls it the same way (same commit,
+# same playwright-minimum and japanese-font; stall-tools left out, apt-heavy and not changed)
+# on a directory with the Playwright quire locks, and checks that a font with Japanese
+# characters is there. `without-font` is the control: the same call without the input.
+name: scratch-932
+on:
+  workflow_dispatch:
+permissions: {}
+jobs:
+  with-font:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Set up Node.js and Playwright
+        uses: bats-lang/pwa/.github/actions/e2e-setup@d5a5685a569df5a6ce126d9aac667c31aa28f866 # pwa main d5a5685
+        with:
+          working-directory: scratch-932
+          playwright-minimum: "1.58"
+          japanese-font: "true"
+      - name: A font with Japanese characters is there
+        run: |
+          fc-list :lang=ja
+          test -n "$(fc-list :lang=ja)"
+  without-font:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Set up Node.js and Playwright
+        uses: bats-lang/pwa/.github/actions/e2e-setup@d5a5685a569df5a6ce126d9aac667c31aa28f866 # pwa main d5a5685
+        with:
+          working-directory: scratch-932
+          playwright-minimum: "1.58"
+      - name: Count the fonts with Japanese characters
+        run: |
+          echo "ja fonts: $(fc-list :lang=ja | wc -l)"

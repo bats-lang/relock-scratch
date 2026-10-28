@@ -4,7 +4,7 @@
 # commit of the base branch, the one this workflow file is from (pull_request_target runs the
 # default branch's files, never the pull request's). Every other repository's text-lint.yml is
 # the template tools/pin-audit/templates/text-lint.yml, which calls it by commit.
-# Scratch adaptation (repository-prototype#509): github.sha is a commit of this scratch repository, which has no tools/text-lint, so tools-ref is the repository-prototype main commit that PR 507 is based on.
+# Scratch adaptation (repository-prototype#509): github.sha is a commit of this scratch repository, which has no tools/text-lint, so tools-ref is the commit of repository-prototype branch rp-509 under test (repository-prototype#509).
 name: text-lint
 
 on:
@@ -19,4 +19,4 @@ jobs:
   text-lint:
     uses: ./.github/workflows/text-lint-check.yml
     with:
-      tools-ref: e5433599e993fdb5345206d047c77c89a38a26da
+      tools-ref: 860dd829602a3d31d21fb9f6db456341a6ed9d35

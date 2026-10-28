@@ -19,4 +19,4 @@ jobs:
   text-lint:
     uses: ./.github/workflows/text-lint-check.yml
     with:
-      tools-ref: 860dd829602a3d31d21fb9f6db456341a6ed9d35
+      tools-ref: ec81cfd2911a08a4301336bcf56caf77d4f9cdf3

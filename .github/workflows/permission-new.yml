@@ -1,0 +1,8 @@
+name: permission-new
+on:
+  push:
+    branches: [public]
+permissions:
+  issues: write
+  statuses: write
+jobs: {}

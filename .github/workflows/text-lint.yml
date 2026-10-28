@@ -1,10 +1,8 @@
-# The form of every pull request body of this repository (bats-lang/repository-prototype#487,
-# keyword: text-lint): the caller of the shared lint, which this repository hosts, so it is
-# called by path as package-check.yml is, not by commit; the tools are checked out at the
-# commit of the base branch, the one this workflow file is from (pull_request_target runs the
-# default branch's files, never the pull request's). Every other repository's text-lint.yml is
-# the template tools/pin-audit/templates/text-lint.yml, which calls it by commit.
-# Scratch adaptation (repository-prototype#509): github.sha is a commit of this scratch repository, which has no tools/text-lint, so tools-ref is the commit of repository-prototype branch rp-509 under test (repository-prototype#509).
+# The form of every pull request body, one lint for every repository of the organisation
+# (bats-lang/repository-prototype#487): the first line is Fixes #N, one ticket, a Head line
+# that is the head, one generated-by footer. The result is the commit status text-lint on the
+# head, set again on every edit of the body. The work is the shared text-lint-check.yml,
+# called by commit; tools-ref is the same commit (a reusable workflow cannot read its own).
 name: text-lint
 
 on:
@@ -17,6 +15,6 @@ permissions:
 
 jobs:
   text-lint:
-    uses: ./.github/workflows/text-lint-check.yml
+    uses: bats-lang/repository-prototype/.github/workflows/text-lint-check.yml@f7c08d40621f70f8190f8e6b71bb5d7ef4e88708 # repository-prototype main f7c08d4
     with:
-      tools-ref: ec81cfd2911a08a4301336bcf56caf77d4f9cdf3
+      tools-ref: f7c08d40621f70f8190f8e6b71bb5d7ef4e88708

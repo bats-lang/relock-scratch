@@ -1,0 +1,5 @@
+name: watch-new
+on:
+  watch:
+    types: [started]
+jobs: {}

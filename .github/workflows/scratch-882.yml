@@ -1,0 +1,94 @@
+# A reduced copy of the change of bats-lang/quire#968 (#882), run where the file can be on
+# the default branch (bats-lang/repository-prototype#509, keyword: text-lint gated). quire's
+# check.yml needs the app, its secrets and a merge queue; this holds the logic the change
+# adds: the `queue` job (the same text, pwa's queue-passed by commit), the expressions the
+# groups read `skip` with, and the check job's step. `planned` stands for the plan job.
+# The `stub-queue` job is a control: it gives skip=true, as a merge-queue-passed push would,
+# and the same expressions must then end the groups after their first step.
+name: scratch-882
+on:
+  workflow_dispatch:
+permissions: {}
+jobs:
+  queue:
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      skip: ${{ steps.queue.outputs.skip }}
+      run_url: ${{ steps.queue.outputs.run-url }}
+      reason: ${{ steps.queue.outputs.reason }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Did the merge queue pass this commit
+        id: queue
+        uses: bats-lang/pwa/.github/actions/queue-passed@3cace57c2c9dde8923a5eef219a008791a85f54c # pwa main 3cace57
+  stub-queue:
+    runs-on: ubuntu-24.04
+    outputs:
+      skip: ${{ steps.stub.outputs.skip }}
+      run_url: ${{ steps.stub.outputs.run_url }}
+      reason: ${{ steps.stub.outputs.reason }}
+    steps:
+      - id: stub
+        run: |
+          echo "skip=true" >> "$GITHUB_OUTPUT"
+          echo "run_url=https://example.invalid/stub-queue-run" >> "$GITHUB_OUTPUT"
+          echo "reason=stub: the queue passed this commit" >> "$GITHUB_OUTPUT"
+  planned:
+    runs-on: ubuntu-24.04
+    outputs:
+      static_run: ${{ steps.plan.outputs.static_run }}
+      e2e_run: ${{ steps.plan.outputs.e2e_run }}
+    steps:
+      - id: plan
+        run: |
+          echo 'static_run={"checkers":{"members":"affected_test guidelines","bats":false}}' >> "$GITHUB_OUTPUT"
+          echo 'e2e_run={"reader":true}' >> "$GITHUB_OUTPUT"
+  # the expressions of quire's static and e2e jobs, on the real queue job
+  groups-real:
+    needs: [planned, queue]
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        group: [checkers]
+    env:
+      GROUP_MEMBERS: ${{ needs.queue.outputs.skip != 'true' && fromJSON(needs.planned.outputs.static_run)[matrix.group].members || '' }}
+      GROUP_BATS: ${{ needs.queue.outputs.skip != 'true' && fromJSON(needs.planned.outputs.static_run)[matrix.group].bats && 'yes' || 'no' }}
+      GROUP_RUN: ${{ needs.queue.outputs.skip == 'true' && 'no' || toJSON(fromJSON(needs.planned.outputs.e2e_run)['reader']) == 'false' && 'no' || 'yes' }}
+    steps:
+      - run: 'echo "real queue: skip=${{ needs.queue.outputs.skip }} members=[$GROUP_MEMBERS] bats=$GROUP_BATS e2e_run=$GROUP_RUN"'
+      - run: '[ "$GROUP_MEMBERS" = "affected_test guidelines" ] && [ "$GROUP_RUN" = yes ] && [ "$GROUP_BATS" = no ]'
+  # the same expressions on skip=true (the control)
+  groups-skipped:
+    needs: [planned, stub-queue]
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        group: [checkers]
+    env:
+      GROUP_MEMBERS: ${{ needs.stub-queue.outputs.skip != 'true' && fromJSON(needs.planned.outputs.static_run)[matrix.group].members || '' }}
+      GROUP_BATS: ${{ needs.stub-queue.outputs.skip != 'true' && fromJSON(needs.planned.outputs.static_run)[matrix.group].bats && 'yes' || 'no' }}
+      GROUP_RUN: ${{ needs.stub-queue.outputs.skip == 'true' && 'no' || toJSON(fromJSON(needs.planned.outputs.e2e_run)['reader']) == 'false' && 'no' || 'yes' }}
+    steps:
+      - run: 'echo "stub queue: skip=${{ needs.stub-queue.outputs.skip }} members=[$GROUP_MEMBERS] bats=$GROUP_BATS e2e_run=$GROUP_RUN"'
+      - run: '[ -z "$GROUP_MEMBERS" ] && [ "$GROUP_RUN" = no ] && [ "$GROUP_BATS" = no ]'
+  # the check job's added step, on both queue jobs' outputs
+  check:
+    if: always()
+    needs: [queue, stub-queue, groups-real, groups-skipped]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Why the groups did not run again
+        env:
+          QUEUE_SKIP: ${{ needs.queue.outputs.skip }}
+          QUEUE_RUN_URL: ${{ needs.queue.outputs.run_url }}
+          QUEUE_REASON: ${{ needs.queue.outputs.reason }}
+        run: |
+          echo "queue-passed: skip=$QUEUE_SKIP: $QUEUE_REASON"
+          echo "queue-passed run: $QUEUE_RUN_URL"
+          echo "queue-passed: skip=$QUEUE_SKIP, $QUEUE_REASON ($QUEUE_RUN_URL)" >> "$GITHUB_STEP_SUMMARY"
+          [ "$QUEUE_SKIP" = false ]
+      - name: Results
+        run: 'echo "${{ needs.groups-real.result }} ${{ needs.groups-skipped.result }}"; [ "${{ needs.groups-real.result }}" = success ] && [ "${{ needs.groups-skipped.result }}" = success ]'

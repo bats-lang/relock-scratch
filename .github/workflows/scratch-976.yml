@@ -1,0 +1,60 @@
+# A reduced copy of the change of bats-lang/quire#986 (#976), run where it can run before
+# the file is on the default branch (bats-lang/repository-prototype#509, keyword: text-lint
+# gated; the route of quire#968 comment 6464390489). quire's check.yml needs the app and
+# Playwright; this holds what the change adds: the workflow_dispatch inputs `spec` and
+# `repeat-each`, the `if:` of the `repeat` job (no spec, no job), the environment that
+# carries both inputs, and the step that passes them quoted as arguments. The generator is
+# a stub that prints its arguments one on each line, so a value is seen to be one argument.
+name: scratch-976
+on:
+  workflow_dispatch:
+    inputs:
+      spec:
+        description: 'repeat job: the e2e spec to repeat (e2e/<name>.spec.js); empty runs no repeat job'
+        required: false
+        type: string
+        default: ''
+      repeat-each:
+        description: 'repeat job: how many times each test runs on each project (a race fix needs 20)'
+        required: false
+        type: string
+        default: '20'
+permissions: {}
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "build ran"
+  repeat:
+    needs: [build]
+    if: github.event_name == 'workflow_dispatch' && inputs.spec != ''
+    runs-on: ubuntu-24.04
+    env:
+      REPEAT_SPEC: ${{ inputs.spec }}
+      REPEAT_EACH: ${{ inputs.repeat-each }}
+    steps:
+      - name: Make the stub generator
+        run: |
+          mkdir -p dist/debug
+          printf '#!/bin/sh\nfor a in "$@"; do printf "arg: [%%s]\\n" "$a"; done\n' > dist/debug/gen-pwa
+      - name: Make the generator runnable
+        run: chmod +x dist/debug/gen-pwa
+      # The spec and the count come from inputs, through the environment and
+      # quoted: a value is an argument, never shell text
+      - name: Repeat the spec on every project
+        run: |
+          mkdir -p "$RUNNER_TEMP/repeat-timings"
+          ./dist/debug/gen-pwa test --timings "$RUNNER_TEMP/repeat-timings" -- --reporter=list --repeat-each "$REPEAT_EACH" "$REPEAT_SPEC"
+  # the repeat job runs exactly when a spec was given
+  expect:
+    if: always()
+    needs: [build, repeat]
+    runs-on: ubuntu-24.04
+    env:
+      SPEC: ${{ inputs.spec }}
+      REPEAT_RESULT: ${{ needs.repeat.result }}
+    steps:
+      - run: |
+          echo "spec=[$SPEC] repeat=$REPEAT_RESULT"
+          if [ -z "$SPEC" ]; then want=skipped; else want=success; fi
+          [ "$REPEAT_RESULT" = "$want" ] || { echo "::error::repeat ended $REPEAT_RESULT, wanted $want"; exit 1; }

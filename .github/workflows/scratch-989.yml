@@ -1,0 +1,34 @@
+# A reduced copy of the change of bats-lang/quire#989, run where the file can be on the default
+# branch (bats-lang/repository-prototype#509, keyword: text-lint gated). quire's check.yml needs
+# the app and its compiler; the change in it is the checkout of the `build` job, which is now
+# `fetch-depth: 0` (was 2) so gen-pwa can count the commits for the Android version code. This
+# has that checkout, by the same commit of actions/checkout, and checks what it is for: the
+# clone is whole and the commits can be counted. `shallow` is the control: the old depth of 2,
+# which must be shallow and must not be countable.
+name: scratch-989
+on:
+  workflow_dispatch:
+permissions: {}
+jobs:
+  whole:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+      - name: The clone is whole and the commits can be counted
+        run: |
+          echo "shallow: $(git rev-parse --is-shallow-repository)"
+          echo "commits: $(git rev-list --count HEAD)"
+          test "$(git rev-parse --is-shallow-repository)" = false
+  shallow:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 2
+      - name: The control, the clone is shallow
+        run: |
+          echo "shallow: $(git rev-parse --is-shallow-repository)"
+          echo "commits: $(git rev-list --count HEAD)"
+          test "$(git rev-parse --is-shallow-repository)" = true

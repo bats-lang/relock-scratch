@@ -1,8 +1,10 @@
-# The form of every pull request body, one lint for every repository of the organisation
-# (bats-lang/repository-prototype#487): the first line is Fixes #N, one ticket, a Head line
-# that is the head, one generated-by footer. The result is the commit status text-lint on the
-# head, set again on every edit of the body. The work is the shared text-lint-check.yml,
-# called by commit; tools-ref is the same commit (a reusable workflow cannot read its own).
+# The form of every pull request body, one lint for the repositories that call pitboss
+# (pitboss#38): the first line is Fixes #N, one ticket, a Head line that is the head, one
+# footer. The result is the commit status text-lint on the head, set again on every edit
+# of the body. The work is pitboss's text-lint-check.yml, called by commit (never @main);
+# tools-ref is the same commit (a reusable workflow cannot read its own).
+# Fill COMMIT with a full 40-character commit SHA of dev-skill-up/pitboss and VERSION with
+# a comment naming it.
 name: text-lint
 
 on:
@@ -15,6 +17,6 @@ permissions:
 
 jobs:
   text-lint:
-    uses: bats-lang/repository-prototype/.github/workflows/text-lint-check.yml@f7c08d40621f70f8190f8e6b71bb5d7ef4e88708 # repository-prototype main f7c08d4
+    uses: dev-skill-up/pitboss/.github/workflows/text-lint-check.yml@8b2a6dd24a9e624b6bac13c29b03362f24dfaa00 # pitboss fix-38 8b2a6dd
     with:
-      tools-ref: f7c08d40621f70f8190f8e6b71bb5d7ef4e88708
+      tools-ref: 8b2a6dd24a9e624b6bac13c29b03362f24dfaa00

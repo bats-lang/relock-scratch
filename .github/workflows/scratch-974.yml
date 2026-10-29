@@ -1,0 +1,77 @@
+# A reduced copy of the change of bats-lang/quire#981 (#974), run where it can run before
+# the file is on the default branch (bats-lang/repository-prototype#509, keyword: text-lint
+# gated; the route of quire#968 comment 6464390489, as relock-scratch#27 did for #986).
+# quire's check.yml needs the app; this holds what the change adds: the step `Check the
+# app` with continue-on-error, the job output `app` (the step's outcome), every later step of
+# `build` guarded by it, `static`, `e2e` and `android` that need `build` and run only when
+# the output is `success`, and the `check` step that fails when it is not. The check of the
+# app is `exit 1` when the input `app-check-fails` is true, so a run shows exactly one failed
+# job (`check`), and the control (false) shows every job a success.
+name: scratch-974
+on:
+  workflow_dispatch:
+    inputs:
+      app-check-fails:
+        description: 'true: the step that checks the app fails (the run must have one failed job)'
+        required: false
+        type: string
+        default: 'true'
+permissions: {}
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "plan ran"
+  build:
+    needs: plan
+    runs-on: ubuntu-24.04
+    outputs:
+      app: ${{ steps.app.outcome }}
+    env:
+      APP_CHECK_FAILS: ${{ inputs.app-check-fails }}
+    steps:
+      - name: Check the app
+        id: app
+        continue-on-error: true
+        run: |
+          if [ "$APP_CHECK_FAILS" = true ]; then echo "::error::bats check failed (stand-in)"; exit 1; fi
+          echo "app checked"
+      - name: Upload the checked app
+        if: steps.app.outcome == 'success'
+        run: echo "uploaded the checked app"
+      - name: Build the app and the PWA generator
+        if: steps.app.outcome == 'success'
+        run: echo "built"
+  static:
+    needs: [plan, build]
+    if: needs.build.outputs.app == 'success'
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "static ran on the checked app"
+  e2e:
+    needs: [plan, build]
+    if: needs.build.outputs.app == 'success'
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "e2e ran"
+  android:
+    needs: build
+    if: needs.build.outputs.app == 'success'
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "android ran"
+  check:
+    if: always()
+    needs: [plan, build, static, e2e, android]
+    runs-on: ubuntu-24.04
+    env:
+      APP_CHECK: ${{ needs.build.outputs.app }}
+      RESULTS: ${{ needs.plan.result }} ${{ needs.build.result }} ${{ needs.static.result }} ${{ needs.e2e.result }} ${{ needs.android.result }}
+    steps:
+      - name: The app passed its check
+        run: |
+          echo "results (plan build static e2e android): $RESULTS"
+          if [ "$APP_CHECK" != success ]; then
+            echo "::error::bats check of the app did not pass (the step 'Check the app' of job build ended: '$APP_CHECK')"
+            exit 1
+          fi

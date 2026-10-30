@@ -1,0 +1,3 @@
+Fixture of bats-lang/repository-prototype#545: the open pull request from this branch
+(relock-hold/2026-10-01) is the previous relock that relock-pins-test.yml's `hold` job
+finds. Leave it open.

@@ -1,0 +1,39 @@
+# A reduced copy of the change of bats-lang/quire#1003 to quire's text-lint.yml, run where the file
+# can be on the default branch (bats-lang/repository-prototype#509, keyword: text-lint gated).
+# quire's text-lint.yml runs on pull_request_target (also issue_comment and issues) and its change
+# is the bump of its checkout step from actions/checkout v4.4.0 to v7.0.1 (commit
+# 3d3c42e5aac5ba805825da76410c181273ba90b1), a checkout with no `ref:`. This has the same
+# triggers for the pull request event, the same permissions of the job and that checkout, and
+# checks what quire's comment says of it: the checkout is the default branch's commit, nothing of
+# the pull request is checked out, and v7's block on a fork pull request does not stop it.
+name: scratch-1003
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+permissions: {}
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      statuses: write
+      pull-requests: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: The checkout is the default branch, with nothing of the pull request
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          echo "event: $GITHUB_EVENT_NAME"
+          echo "GITHUB_SHA (the default branch): $GITHUB_SHA"
+          echo "checked out: $(git rev-parse HEAD)"
+          echo "pull request base: $BASE_SHA"
+          echo "pull request head: $HEAD_SHA (from $HEAD_REPO)"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse HEAD)" != "$HEAD_SHA"
+          echo "files of the pull request present in the checkout:"
+          ls run-1003.txt 2>&1 || true
+          test ! -e run-1003.txt

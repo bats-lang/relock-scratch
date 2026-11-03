@@ -1,0 +1,12 @@
+# Publishes this package to bats-lang/repository-prototype when src/ or
+# bats.toml changes on main. See PUBLISHING-SETUP.md there. Called by
+# commit, which the daily relock moves (bats-lang/repository-prototype#269).
+name: publish-282
+on:
+  push:
+    branches: [pwa-282-never]
+    paths: ['src/**', 'bats.toml']
+jobs:
+  publish:
+    uses: bats-lang/repository-prototype/.github/workflows/publish.yml@a804080ea8e13a5a4bcb1b66879b06f9294a2359 # repository-prototype main a804080
+    secrets: inherit

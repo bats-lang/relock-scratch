@@ -17,6 +17,6 @@ permissions:
 
 jobs:
   text-lint:
-    uses: dev-skill-up/pitboss/.github/workflows/text-lint-check.yml@8b2a6dd24a9e624b6bac13c29b03362f24dfaa00 # pitboss fix-38 8b2a6dd
+    uses: dev-skill-up/pitboss/.github/workflows/text-lint-check.yml@8b2a6dd24a9e624b6bac13c29b03362f24dfaa00 # v0.0.0
     with:
       tools-ref: 8b2a6dd24a9e624b6bac13c29b03362f24dfaa00

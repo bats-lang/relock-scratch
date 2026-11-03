@@ -11,7 +11,7 @@
 #     statuses: write
 #   jobs:
 #     text-lint:
-#       uses: bats-lang/repository-prototype/.github/workflows/text-lint-check.yml@<commit> # <version>
+#       uses: <owner>/<repository>/.github/workflows/text-lint-check.yml@<commit> # <version>
 #       with:
 #         tools-ref: <the same commit>
 #

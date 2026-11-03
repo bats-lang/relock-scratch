@@ -1,12 +1,33 @@
+# Daily: relock this package and move its CI pins to their newest, as a
+# pull request that runs check.yml (bats-lang/repository-prototype#269).
+# The work is the shared relock-pins.yml, called by commit.
 name: relock
+
 on:
+  schedule:
+    - cron: '13 5 * * *'
   workflow_dispatch:
+
 permissions:
   contents: write
   pull-requests: write
   actions: write
   issues: write
+
 jobs:
   relock:
-    uses: bats-lang/repository-prototype/.github/workflows/relock-pins.yml@f0c9aa3c6467b50070aa6ef5ea17c5b014372d29 # PR head (repository-prototype#416)
+    uses: bats-lang/repository-prototype/.github/workflows/relock-pins.yml@a804080ea8e13a5a4bcb1b66879b06f9294a2359 # repository-prototype main a804080
     secrets: inherit
+    with:
+      npm-ignore: |
+        example
+      workflow-pins: |
+        bats-lang/repository-prototype/.github/workflows/publish.yml
+        bats-lang/repository-prototype/.github/workflows/relock-pins.yml
+        bats-lang/repository-prototype/.github/workflows/text-lint-check.yml
+      pin-copies: |
+        bats-lang/repository-prototype/.github/workflows/text-lint-check.yml tools-ref
+      repin-command: |
+        sh tools/android-sdk-pins/relock.sh tools/android-sdk-pins
+      repin-paths: |
+        tools/android-sdk-pins

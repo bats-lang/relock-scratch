@@ -1,0 +1,19 @@
+# A copy of the text-lint.yml that bats-lang/quire#1047 writes (the filled template of
+# repository-prototype's tools/pin-audit/templates/text-lint.yml at 92935e0e2e66dec31da594f48355e5758aa203b6),
+# on the default branch of this repository, so that its real pull_request_target run exists
+# (bats-lang/repository-prototype#509, keyword: text-lint gated). Only `name` differs from quire's file.
+name: scratch-1047
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  text-lint:
+    uses: bats-lang/repository-prototype/.github/workflows/text-lint-check.yml@92935e0e2e66dec31da594f48355e5758aa203b6 # repository-prototype main 92935e0
+    with:
+      tools-ref: 92935e0e2e66dec31da594f48355e5758aa203b6

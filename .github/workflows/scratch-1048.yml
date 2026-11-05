@@ -1,0 +1,28 @@
+# A reduced copy of quire's relock.yml as bats-lang/quire#1048 changes it (the PR is
+# bats-lang/quire#1056), on the default branch of this repository, so that the run of a workflow
+# the default branch runs exists (bats-lang/repository-prototype#509, keyword: text-lint gated;
+# quire's relock.yml has the trigger `schedule`). It calls the same relock-pins.yml at the same
+# commit as quire's file, with the pin of the text-lint workflow and the tools-ref copy that the
+# change adds. quire's other pins have no caller in this repository, so they are left out, and
+# publish is false: nothing is pushed here.
+name: scratch-1048
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+  issues: write
+
+jobs:
+  relock:
+    uses: bats-lang/repository-prototype/.github/workflows/relock-pins.yml@0ba6bd597466307d9feed6c6e8362e10c9206aa4 # repository-prototype main 0ba6bd5
+    secrets: inherit
+    with:
+      publish: 'false'
+      workflow-pins: |
+        bats-lang/repository-prototype/.github/workflows/text-lint-check.yml
+      pin-copies: |
+        bats-lang/repository-prototype/.github/workflows/text-lint-check.yml tools-ref

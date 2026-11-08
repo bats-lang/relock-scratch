@@ -1,0 +1,83 @@
+# The mechanism of bats-lang/pwa#292: setup-java's cache-jdk, as android.yml (bats-lang/pwa, the
+# branch pwa-292-jdk-cache) uses it for the JDK of .java-version. A reduced copy: the same
+# action pin and the same inputs, with the download of the JDK made to fail by pointing github.com
+# (which the Adoptium API redirects the binary to) at 127.0.0.1 before the step. android.yml itself
+# cannot be run with its download failing, since its setup-java step is inside the called workflow.
+name: scratch-292
+on:
+  push:
+    branches: [scratch-292]
+permissions:
+  contents: read
+jobs:
+  populate:
+    # an ordinary run: downloads, and the post step saves the cache of the pinned JDK
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version-file: pinned/.java-version
+          cache-jdk: true
+      - run: java -version
+
+  cached-download-fails:
+    # the download fails, the cache has the JDK: the job must pass
+    needs: populate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Make the download of the JDK fail
+        run: echo "127.0.0.1 github.com release-assets.githubusercontent.com objects.githubusercontent.com" | sudo tee -a /etc/hosts
+      - name: The download is refused
+        run: "! curl -sS -m 20 -o /dev/null https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12%2B8/OpenJDK21U-jdk_x64_linux_hotspot_21.0.12_8.tar.gz"
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version-file: pinned/.java-version
+          cache-jdk: true
+      - run: java -version
+
+  control-without-the-mechanism:
+    # the same, without cache-jdk: the step must fail
+    needs: populate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Make the download of the JDK fail
+        run: echo "127.0.0.1 github.com release-assets.githubusercontent.com objects.githubusercontent.com" | sudo tee -a /etc/hosts
+      - id: jdk
+        continue-on-error: true
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version-file: pinned/.java-version
+      - name: setup-java without cache-jdk must have failed
+        env:
+          OUTCOME: ${{ steps.jdk.outcome }}
+        run: |
+          echo "setup-java outcome: $OUTCOME"
+          test "$OUTCOME" = failure
+
+  nothing-cached-download-fails:
+    # the download fails and the pinned version was never cached: the step must still fail
+    needs: populate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Make the download of the JDK fail
+        run: echo "127.0.0.1 github.com release-assets.githubusercontent.com objects.githubusercontent.com" | sudo tee -a /etc/hosts
+      - id: jdk
+        continue-on-error: true
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version-file: pinned/.java-version-uncached
+          cache-jdk: true
+      - name: setup-java with an uncached version must have failed
+        env:
+          OUTCOME: ${{ steps.jdk.outcome }}
+        run: |
+          echo "setup-java outcome: $OUTCOME"
+          test "$OUTCOME" = failure

@@ -1,14 +1,15 @@
-# Fixture of bats-lang/repository-prototype#669: the recheck of the pull requests of this repository that are
-# red on canonical-files, run by hand with the ref whose allowlist holds the line that was merged.
+# Fixture of bats-lang/repository-prototype#669: this repository plays the part of repository-prototype.
+# Its main holds tools/pin-audit/allowlist.txt and the templates (copied from repository-prototype), and the
+# push to its main that changes the allowlist or a template rechecks the pull requests of this repository
+# that are red on canonical-files, against this repository's own main.
 name: canonical-files-recheck
 
 on:
-  workflow_dispatch:
-    inputs:
-      data-ref:
-        description: The ref of repository-prototype whose allowlist and templates are read.
-        required: true
-        type: string
+  push:
+    branches: [main]
+    paths:
+      - tools/pin-audit/allowlist.txt
+      - tools/pin-audit/templates/**
 
 permissions:
   contents: read
@@ -18,10 +19,10 @@ permissions:
 
 jobs:
   recheck:
-    uses: bats-lang/repository-prototype/.github/workflows/canonical-files-recheck.yml@df9bdd5526b4336505bab55bb375e0f4ceea1b33 # repository-prototype main df9bdd5
+    uses: bats-lang/repository-prototype/.github/workflows/canonical-files-recheck.yml@baeefe62555ba1dcc9762b0a1a947d483f3b0cb9 # repository-prototype main baeefe6
     with:
-      tools-ref: df9bdd5526b4336505bab55bb375e0f4ceea1b33
-      data-ref: ${{ inputs.data-ref }}
+      tools-ref: baeefe62555ba1dcc9762b0a1a947d483f3b0cb9
+      data-repository: bats-lang/relock-scratch
       repository: bats-lang/relock-scratch
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}

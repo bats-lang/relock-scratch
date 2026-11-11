@@ -18,9 +18,9 @@ permissions:
 
 jobs:
   recheck:
-    uses: bats-lang/repository-prototype/.github/workflows/canonical-files-recheck.yml@aa889a50927644e55e1e6f56c90d6e00c2b40935 # repository-prototype main aa889a5
+    uses: bats-lang/repository-prototype/.github/workflows/canonical-files-recheck.yml@11d37436cb0260b5dea5d0938d9da78d627ba2df # repository-prototype main 11d3743
     with:
-      tools-ref: aa889a50927644e55e1e6f56c90d6e00c2b40935
+      tools-ref: 11d37436cb0260b5dea5d0938d9da78d627ba2df
       data-ref: ${{ inputs.data-ref }}
       repository: bats-lang/relock-scratch
     secrets:

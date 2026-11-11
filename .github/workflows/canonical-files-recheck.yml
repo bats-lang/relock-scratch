@@ -24,4 +24,4 @@ jobs:
       data-ref: ${{ inputs.data-ref }}
       repository: bats-lang/relock-scratch
     secrets:
-      token: ${{ github.token }}
+      token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,39 @@
+# The workflow files that are neither a caller nor a template, by hash
+# (bats-lang/repository-prototype#396, keyword: pin-audit allowlist).
+#
+# One entry on each line:
+#   <repository>/<path> <sha256> [<next sha256>] # <comment>
+# The sha256 is of the file on the repository's default branch. A second
+# hash is the next one: a repository that changes a file first adds the new
+# hash here beside the old (a pull request here), then changes the file,
+# then a later pull request here drops the old hash. A third hash is not an
+# entry. The comment is the ticket that says to fix the file
+# (<repository>#<number>), so no exception is permanent. An entry with no
+# such comment, a malformed entry or a repeated file fails the audit. A file
+# that is listed and also equals a template fails too: drop its entry.
+#
+bats/.github/workflows/relock.yml 0a9694b116fb154564aa7a91c673a5d5b96e941f18413112210e152cf540e4f9 9b014601af94b87f7994cd3be7dbd7dd8c53727321bf4db9f7ee62c746f5bb5a # bats#499
+quire/.github/workflows/guidelines-lint.yml bfff683e2c435aeacaf9c9e6ad5670ec282eaae48f67da811e3a68042f5ef238 # quire#815
+quire/.github/workflows/supersede.yml 48099ff84eaf66cae1cbe4945ee8576954471bb2acc31e78d3e8e8504ee4f430 # quire#815
+quire/.github/workflows/sync-identity.yml 0e51a5f4ee3381162755e321dcc69abcc90ede52e692ae7f32c79673183e307f # quire#815
+quire/.github/workflows/sync-providers.yml b3b257a65cac9bcfdb7db0f0c453f82f48bee26fd0be6a4aa4b88096d93eadb6 # quire#815
+pwa/.github/workflows/android.yml e4f25705a9abae04ecb53418b40eb10f8ad5adf825aae82c2f606ef585afb670 714629c6c8d5b30eadd203e7b24de21ca660647828b2600f8bea2f209185aa51 # pwa#307
+pwa/.github/workflows/check.yml 0606b576b5612a36c08730981852b85442cafc4ef0b3731456f43bf020d09acd 79c6555c3b9497c1d7f40c912567e84017b762bbacd66bfae8ed48ef30e2e154 # pwa#307
+pwa/.github/workflows/play-release.yml 9a72b1428a0b40624307da9249ff7c236fa74109ad5e0d803bb839a81ed1dd4a # repository-prototype#462
+pwa/.github/workflows/relock-android-test.yml 1d01c9fa1d73cce5032ff63ee1c37177dd95a5adde4de3e89d4094789f6dd2fc # pwa#185
+capacitor-plugins/.github/workflows/check.yml 60668ba436e27723d8543a14e24119c8e9e87af040acb955dd333191b4a416d5 # capacitor-plugins#47
+capacitor-plugins/.github/workflows/demo-apk.yml b896e7f4e7c74b3de790aec235a448285886defbc1ef63f390c949461f748615 # capacitor-plugins#47
+repository-prototype/.github/workflows/check-aggregate-test.yml e27174f32c44395d688e5eefa4f56e78523ad82a4265dcbaef75336198d078fd # repository-prototype#397
+repository-prototype/.github/workflows/package-check.yml 631e507487c1f4b6673cbf33b5b518ca0d8843ebe112c1d981a29a9035b99b57 b4a573d71a1b86609718b5ceb46c9bf8271eb5998763d4485950630f7219dd3d # repository-prototype#397
+repository-prototype/.github/workflows/publish.yml aacd3c39b9e135391512b2353277bd2c6de54424b6b64a4865b0b9d7c2cf5c3d # repository-prototype#397
+repository-prototype/.github/workflows/relock-pins.yml 035372fa915bbee72f2389d13b85666d3cc1a022ff5ee6d26104fcc22a248a22 # repository-prototype#439
+repository-prototype/.github/workflows/relock-pins-test.yml a7b608308acf11ce189be38621ddce7be908cfa26318ba1e7a736ff36e5b6989 # repository-prototype#397
+repository-prototype/.github/workflows/input-overlap.yml 5eca92b3875edd5c7ea3cc810ae5c121fa5f37884c77295450245c495fe9fa4e # repository-prototype#544
+repository-prototype/.github/workflows/input-overlap-check.yml 3f8f157393d63a0660498cad4ec628b15ec589444de546bfeb982e0c7e0761e4 # repository-prototype#544
+repository-prototype/.github/workflows/canonical-files-check.yml 0977c6f3ba6553cde5bd2efb6274c5d5fd5fe31041ce1a7d3d970a8cf57b9e95 # repository-prototype#603
+repository-prototype/.github/workflows/canonical-files-recheck.yml 58b65c4db24d49ad9cf0a75b6f4f181509bd2390df2b3772ec8381a63077cb61 # repository-prototype#669
+repository-prototype/.github/workflows/text-lint.yml cb47a27cf8f74008df92451d2e291a1a3cf3947aa6ac2a025ef21ca0e1068843 # repository-prototype#487
+repository-prototype/.github/workflows/text-lint-check.yml 6e7a1bb6d843f7d9e52b50570e81c61e304cb63a2c1c8984b26f58190de778c5 87afabdf48601282a3464a237ba4e29d38aa940f05d317968d4fc1fa890f960c # repository-prototype#509
+repository-prototype/.github/workflows/tools-test.yml 620fe9a416cd32c61f05bb733c95cf3a29bd1187e9a528ac3cd83b5940a93266 d3fac5840900f8677fb178b2654af0c3164f9aaacaae626ab2d2f6ae659455a2 # repository-prototype#397
+repository-prototype/.github/workflows/verify.yml 1a5c9600d9d3c6d6a5beaeefd3f386154eed17665b9caf3a921f25ca58c35290 390a50b193c2133685e4623bd25cd1d8a84e67944922f8873d681cb03ca73957 # repository-prototype#397
+repository-prototype/.github/workflows/pin-audit.yml 1804851257659f6dad3bb9f0b4029d3c39775a8614305c8c7e01e3b96a915ec6 9282feda73ca437712d5f3533a74ac2ee9dd05af2ef744b5a2320446fe2fc9a5 # repository-prototype#397

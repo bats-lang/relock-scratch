@@ -1,0 +1,15 @@
+# A bespoke file that no allowlist lists: the pull request that adds it is red on canonical-files
+# (repository-prototype#669).
+name: scratch-669
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  nothing:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo scratch-669

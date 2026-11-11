@@ -1,0 +1,27 @@
+# Fixture of bats-lang/repository-prototype#669: the recheck of the pull requests of this repository that are
+# red on canonical-files, run by hand with the ref whose allowlist holds the line that was merged.
+name: canonical-files-recheck
+
+on:
+  workflow_dispatch:
+    inputs:
+      data-ref:
+        description: The ref of repository-prototype whose allowlist and templates are read.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  statuses: write
+  pull-requests: read
+  checks: read
+
+jobs:
+  recheck:
+    uses: bats-lang/repository-prototype/.github/workflows/canonical-files-recheck.yml@d05e19844e6c6b6fe3ad7b7c5900e6bca12d1252 # repository-prototype main d05e198
+    with:
+      tools-ref: d05e19844e6c6b6fe3ad7b7c5900e6bca12d1252
+      data-ref: ${{ inputs.data-ref }}
+      repository: bats-lang/relock-scratch
+    secrets:
+      token: ${{ github.token }}

@@ -1,0 +1,15 @@
+# Fixture of bats-lang/repository-prototype#669: the caller of the shared canonical-files check.
+name: canonical-files
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  canonical-files:
+    uses: bats-lang/repository-prototype/.github/workflows/canonical-files-check.yml@d05e19844e6c6b6fe3ad7b7c5900e6bca12d1252 # repository-prototype main d05e198
+    with:
+      tools-ref: d05e19844e6c6b6fe3ad7b7c5900e6bca12d1252

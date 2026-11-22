@@ -1,0 +1,30 @@
+# A reduced copy of quire's relock.yml as bats-lang/quire#1118 changes it (the PR is
+# bats-lang/quire#1120), on the default branch of this repository, so that the run of a workflow
+# the default branch runs exists (bats-lang/repository-prototype#509, keyword: text-lint gated;
+# quire's relock.yml has the trigger `schedule`). It calls the same relock-pins.yml at the same
+# commit as quire's file, with the pin of the canonical-files workflow and the tools-ref copy that
+# the change adds. quire's other pins have no caller in this repository, so they are left out,
+# publish is false (nothing is pushed here), and branch-prefix is its own so that an open
+# relock/ pull request here cannot hold the run (keyword: relock hold).
+name: scratch-1118
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+  issues: write
+
+jobs:
+  relock:
+    uses: bats-lang/repository-prototype/.github/workflows/relock-pins.yml@ef9f4f0ad11afb18d4d1d776356058a9a236f733 # repository-prototype main ef9f4f0
+    secrets: inherit
+    with:
+      publish: 'false'
+      branch-prefix: scratch-1118/
+      workflow-pins: |
+        bats-lang/repository-prototype/.github/workflows/canonical-files-check.yml
+      pin-copies: |
+        bats-lang/repository-prototype/.github/workflows/canonical-files-check.yml tools-ref

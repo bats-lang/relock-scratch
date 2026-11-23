@@ -1,0 +1,31 @@
+# Scratch run for bats-lang/quire#1115 (quire#1113): the job clock and the
+# queue run's number of quire's check.yml, reduced to the one job that holds
+# them. Quire's file has `schedule` among its triggers, so a workflow the
+# default branch runs is shown running before it merges (keyword: text-lint
+# gated, repository-prototype#509). Run by workflow_dispatch only.
+name: scratch-1113
+
+on:
+  workflow_dispatch:
+
+jobs:
+  queue:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Start the job's clock
+        run: echo "JOB_STARTED=$(date +%s)" >> "$GITHUB_ENV"
+
+      - name: The queue run's number
+        id: number
+        env:
+          RUN_URL: https://github.com/bats-lang/quire/actions/runs/45090605427
+        run: echo "id=${RUN_URL##*/}" >> "$GITHUB_OUTPUT"
+
+      - name: The number is the run's
+        env:
+          ID: ${{ steps.number.outputs.id }}
+        run: test "$ID" = 45090605427 && echo "run id $ID"
+
+      - name: How long the job took
+        if: always()
+        run: echo "job took $(( $(date +%s) - JOB_STARTED )) s"

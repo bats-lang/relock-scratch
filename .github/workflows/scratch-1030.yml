@@ -1,0 +1,29 @@
+# Scratch run for bats-lang/quire#1030 (the PR that supersedes quire#1083): the
+# step of quire's check.yml that puts the smoke probes beside the Android
+# project, with the check that the result probe is there, reduced to the one
+# job that holds them. Quire's file has `schedule` among its triggers, so a
+# workflow the default branch runs is shown running before it merges (keyword:
+# text-lint gated, repository-prototype#509). Run by workflow_dispatch only.
+name: scratch-1030
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probes:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: The probes and the Android project's directory
+        run: |
+          mkdir -p scripts/android dist/android
+          for name in smoke-open smoke-ready smoke-select-point smoke-tap-points smoke-tap-result; do
+            echo "1" > "scripts/android/$name.js"
+          done
+
+      - name: Put the smoke probes beside the Android project
+        run: cp scripts/android/smoke-open.js scripts/android/smoke-ready.js scripts/android/smoke-select-point.js scripts/android/smoke-tap-points.js scripts/android/smoke-tap-result.js dist/android/
+
+      - name: The result probe is beside the project
+        run: |
+          test -s dist/android/smoke-tap-result.js
+          ls dist/android

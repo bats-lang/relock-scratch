@@ -1,0 +1,19 @@
+# The shared text-lint-check.yml of bats-lang/repository-prototype#703 at its head, on the default
+# branch of this repository, so that the run the default branch makes for a pull request is the real
+# one (bats-lang/repository-prototype#509, keyword: text-lint gated). The pull request it lints is
+# a publish pull request: branch publish/<archive>, title and body as publish.yml writes them.
+name: scratch-703-text-lint
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  text-lint:
+    uses: bats-lang/repository-prototype/.github/workflows/text-lint-check.yml@4066b034ef4b79ab0b3def77b6d18d85c57e55ec # repository-prototype worker/703 4066b03
+    with:
+      tools-ref: 4066b034ef4b79ab0b3def77b6d18d85c57e55ec

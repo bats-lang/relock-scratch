@@ -1,40 +1,18 @@
-# The check the relock pull request runs (repository-prototype#414, #415). It
-# uses an outdated actions/checkout pin on purpose: the relock moves it. The
-# npm job installs with the pinned pnpm from the committed lock only. The
-# gradle job validates the wrapper (its jar against Gradle's published
-# checksums) and runs it under the JDK of .java-version (#416).
 name: check
+
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
+  # A draft pull request runs no job (package-check.yml, keyword: draft-ci), so
+  # marking it ready must start the check: ready_for_review is added to the
+  # default types
   pull_request:
     branches: [main]
-permissions: {}
+    types: [opened, synchronize, reopened, ready_for_review]
+  # The daily relock dispatches it on its relock/<date> branch: a pull
+  # request opened with GITHUB_TOKEN starts no workflow by itself
+  workflow_dispatch:
+
 jobs:
   check:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      - run: git log -1 --format=%H
-  npm:
-    runs-on: ubuntu-24.04
-    env:
-      COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: .nvmrc
-          package-manager-cache: false
-      - run: corepack pnpm install --frozen-lockfile
-      - run: corepack pnpm ls semver uuid
-  gradle:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      - uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
-      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
-        with:
-          distribution: temurin
-          java-version-file: .java-version
-      - run: ./gradlew --version
-      - run: grep -E '^distribution(Url|Sha256Sum)=' gradle/wrapper/gradle-wrapper.properties
+    uses: bats-lang/repository-prototype/.github/workflows/package-check.yml@803b4fb2635580d0f4ee8ac0fb69ccbd8502abbe # repository-prototype draft-ci-525 803b4fb
